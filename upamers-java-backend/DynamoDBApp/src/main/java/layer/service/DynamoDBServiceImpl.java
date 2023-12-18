@@ -79,7 +79,20 @@ public class DynamoDBServiceImpl implements DynamoDBService {
 
     @Override
     public String updateUser(Map<String, String> pathParameters, String inputBody) {
+        User user = new Gson().fromJson(inputBody, User.class);
+        User existingUser = dynamoDBMapper.load(User.class, userToUpdate.getEmail());
 
+        if (existingUser != null) {
+            if (isValidSocialMedia(user.getSocialMedia())) {
+
+                dynamoDBMapper.save(user);
+                return getJsonResponse("User created: " + user.getEmail());
+
+            } else return getJsonResponse("User with such social media links cannot be created");
+
+        } else return getJsonResponse("User with this email already exists");
+    }
+                
         //TODO Implement a record update by Id
         /*
         Add code that accepts parameters, finds required record by Id,
@@ -87,7 +100,6 @@ public class DynamoDBServiceImpl implements DynamoDBService {
         Returns a text message as operation result.
         */
     }
-
     @Override
     public String deleteUser(Map<String, String> pathParameters) {
 
